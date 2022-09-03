@@ -1,6 +1,9 @@
 dependencies:
+- name: minio
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.10.3
 - name: docker-registry
   repository: https://helm.twun.io
   version: 2.2.2
-digest: sha256:8d54a15cc43ab1bf4e912671ebc0dedfe8b93053d0b8d635174f3471c50574ae
-generated: "2022-09-23T14:10:39.526866346+01:00"
+digest: sha256:7156c3f14b560d625954280b1b5b5fdea88ede41a47f14929c8a104a0de4858d
+generated: "2022-09-23T14:12:05.051639218+01:00"
