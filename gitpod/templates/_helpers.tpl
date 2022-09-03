@@ -60,3 +60,7 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{- define "gitpod.imagePullSecret" -}}
+{{- printf "{\"auths\": {\"%s\": {\"auth\": \"%s\"}}}" (printf "%s-%s.%s.svc.cluster.local:%v" .Release.Name .Values.registry.service.name .Release.Namespace .Values.registry.service.port) (printf "%s:%s" .Values.registry.auth.user .Values.registry.auth.password | b64enc) }}
+{{- end }}

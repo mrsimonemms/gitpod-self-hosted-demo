@@ -1,0 +1,21 @@
+# All dependencies should be deployed to the control-plane. This allows
+# connection of ad-hoc nodes without losing data if they stop
+
+.affinity:  &affinity
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: node-role.kubernetes.io/control-plane
+          operator: In
+          values:
+          - "true"
+
+registry:
+  enabled: true
+  affinity:
+    <<: *affinity
+  persistence:
+    enabled: true
+    size: 100Gi
+  tlsSecretName: builtin-registry-certs

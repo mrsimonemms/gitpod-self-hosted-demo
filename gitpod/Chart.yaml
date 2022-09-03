@@ -3,3 +3,9 @@ name: gitpod
 description: Gitpod demo dependencies
 type: application
 version: 1.0.0
+dependencies:
+  - repository: https://helm.twun.io
+    name: docker-registry
+    version: ^2.0.0
+    alias: registry
+    condition: registry.enabled
