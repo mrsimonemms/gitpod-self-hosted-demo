@@ -1,0 +1,26 @@
+Gitpod Self-Hosted Demo
+=======================
+
+Your Gitpod self-hosted demo is now ready for action.
+
+Minio
+=====
+
+{{- if .Values.minio.enabled }}
+Minio is deployed to:
+URL: {{ .Release.Name }}-minio.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.minio.containerPorts.api }}
+User: {{ .Values.minio.auth.rootUser }}
+Password: {{ .Values.minio.auth.rootPassword }}
+{{- else }}
+Minio is not installed
+{{- end }}
+
+Registry
+========
+
+{{- if .Values.registry.enabled }}
+Registry is deployed to:
+URL: {{ .Release.Name }}-{{ .Values.registry.service.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.registry.service.port }}
+{{- else }}
+Registry is not enabled
+{{- end }}
