@@ -4,6 +4,10 @@ description: Gitpod demo dependencies
 type: application
 version: 1.0.0
 dependencies:
+  - repository: https://charts.bitnami.com/bitnami
+    name: minio
+    version: ^11.0.0
+    condition: minio.enabled
   - repository: https://helm.twun.io
     name: docker-registry
     version: ^2.0.0

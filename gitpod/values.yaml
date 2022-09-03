@@ -11,6 +11,24 @@
           values:
           - "true"
 
+minio:
+  enabled: true
+  affinity:
+    <<: *affinity
+  auth:
+    rootUser: root
+    rootPassword: password
+  resources:
+    requests:
+      # defaults to 4GB, set to 2GB to be able to start on smaller instances
+      memory: 2G
+  extraEnvVars:
+    - name: MINIO_SKIP_CLIENT
+      value: "yes"
+  persistence:
+    # The data will be canned each restart (likely a new day)
+    enabled: false
+
 registry:
   enabled: true
   affinity:
