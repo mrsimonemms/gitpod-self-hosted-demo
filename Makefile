@@ -12,7 +12,7 @@ CA_CRT_PATH ?= ${PWD}/ca.crt
 
 DEPENDENCIES_NAME = dependencies
 
-all: gitpod dependencies registry
+all: k3s gitpod dependencies registry load_ca_cert
 
 dependencies:
 	$(shell docker run --entrypoint htpasswd registry:2.7.0 -Bbn ${REGISTRY_USER} ${REGISTRY_PASSWORD} > /tmp/htpasswd)
@@ -35,7 +35,7 @@ dependencies:
 
 get_cert:
 	@kubectl wait -n ${GITPOD_NAMESPACE} --for=condition=Ready certificate/ca-issuer-ca > /dev/null 2>&1
-	@kubectl get secrets -n ${GITPOD_NAMESPACE} ca-issuer-ca -o jsonpath='{.data.ca\.crt}' | base64 -d > ./ca.crt
+	@kubectl get secrets -n ${GITPOD_NAMESPACE} ca-issuer-ca -o jsonpath='{.data.ca\.crt}' | base64 -d > ${CA_CRT_PATH}
 
 	@echo "CA cert downloaded to ${CA_CRT_PATH}"
 .PHONY: get_cert
@@ -75,11 +75,43 @@ gitpod:
 	$(MAKE) wait_for_gitpod
 .PHONY: gitpod
 
+k3s:
+	@echo "Installing k3s to local machine"
+
+	@rm -Rf ${HOME}/.kube
+	@curl https://raw.githubusercontent.com/MrSimonEmms/gitpod-k3s-guide/main/setup.sh | \
+		IP_LIST="127.0.0.1" \
+		SERVER_USER="" \
+		DOMAIN="${GITPOD_URL}" \
+		MANAGED_DNS_PROVIDER=selfsigned \
+		CMD=install \
+		bash
+.PHONY: k3s
+
 kill_registry:
 	@for reg in $$(ps -ef | awk '/kubectl/{print $$2}'); do \
 		kill $$reg || true; \
 	done
 .PHONY: kill_registry
+
+load_ca_cert:
+	@echo "Loading CA certificate to the system"
+	$(MAKE) get_cert
+
+	@echo "Copying Gitpod CA certificate to CA directory"
+	@sudo cp ${CA_CRT_PATH} /usr/local/share/ca-certificates/gitpod.crt
+
+	@echo "Updating CA certificates"
+	@sudo update-ca-certificates
+
+	@echo "Restarting k3s"
+	@sudo systemctl restart k3s
+
+	@echo "Restarting all Gitpod pods"
+	@kubectl delete pods -n ${GITPOD_NAMESPACE} -l app=gitpod
+
+	$(MAKE) wait_for_gitpod
+.PHONY: load_ca_cert
 
 registry:
 	$(MAKE) kill_registry || true
