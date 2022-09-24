@@ -8,11 +8,29 @@ MIRRORED_IMAGES = gitpod/workspace-base gitpod/workspace-full
 REGISTRY_USER ?= username
 REGISTRY_PASSWORD ?= password
 
+SERVER_IP ?=
+SERVER_USER ?=
+
 CA_CRT_PATH ?= ${PWD}/ca.crt
 
 DEPENDENCIES_NAME = dependencies
 
+NODE_EXTRA_ARGS = --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true
+
 all: k3s gitpod dependencies registry load_ca_cert
+
+add_node:
+	@echo "Adding a node to the cluster"
+
+	@command -v k3sup 2>&1 /dev/null || (curl -sLS https://get.k3sup.dev | sh && sudo install k3sup /usr/local/bin/ && rm ./k3sup)
+
+	@k3sup join \
+		--ip="127.0.0.1" \
+        --k3s-channel="stable" \
+        --k3s-extra-args="${NODE_EXTRA_ARGS}" \
+        --server-ip "${SERVER_IP}" \
+        --server-user "${SERVER_USER}"
+.PHONY: add_node
 
 dependencies:
 	$(shell docker run --entrypoint htpasswd registry:2.7.0 -Bbn ${REGISTRY_USER} ${REGISTRY_PASSWORD} > /tmp/htpasswd)
