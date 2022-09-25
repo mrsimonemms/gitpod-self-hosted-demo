@@ -17,7 +17,16 @@ DEPENDENCIES_NAME = dependencies
 
 NODE_EXTRA_ARGS = --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true
 
-all: download_binaries k3s gitpod dependencies registry load_ca_cert
+define READY_MESSAGE
+Your Gitpod instance is now ready on https://${GITPOD_URL}.
+
+You may need to install the CA certificate to your browser. That
+is available at ${CA_CRT_PATH}.
+
+Happy coding.
+endef
+
+all: download_binaries k3s gitpod dependencies registry load_ca_cert ready_message
 
 add_node:
 	@echo "Adding a node to the cluster"
@@ -138,6 +147,11 @@ load_ca_cert:
 
 	$(MAKE) wait_for_gitpod
 .PHONY: load_ca_cert
+
+export READY_MESSAGE
+ready_message:
+	@echo "$$READY_MESSAGE"
+.PHONY: ready_message
 
 registry:
 	$(MAKE) kill_registry || true
