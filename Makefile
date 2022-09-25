@@ -17,7 +17,7 @@ DEPENDENCIES_NAME = dependencies
 
 NODE_EXTRA_ARGS = --node-label=gitpod.io/workload_meta=true --node-label=gitpod.io/workload_ide=true --node-label=gitpod.io/workload_workspace_services=true --node-label=gitpod.io/workload_workspace_regular=true --node-label=gitpod.io/workload_workspace_headless=true
 
-all: k3s gitpod dependencies registry load_ca_cert
+all: download_binaries k3s gitpod dependencies registry load_ca_cert
 
 add_node:
 	@echo "Adding a node to the cluster"
@@ -50,6 +50,15 @@ dependencies:
 
 	@sleep 10
 .PHONY: dependencies
+
+download_binaries:
+	@echo "Checking required local binaries are installed"
+
+	@command -v k3sup 2>&1 /dev/null || (curl -sLS https://get.k3sup.dev | sh && sudo install k3sup /usr/local/bin/ && rm ./k3sup)
+	@command -v kubectl 2>&1 /dev/null || (curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm ./kubectl)
+	@command -v helm 2>&1 /dev/null || (curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash)
+	@command -v kubectl-kots 2>&1 /dev/null || (curl https://kots.io/install | bash)
+.PHONY: download_binaries
 
 get_cert:
 	@kubectl wait -n ${GITPOD_NAMESPACE} --for=condition=Ready certificate/ca-issuer-ca > /dev/null 2>&1
