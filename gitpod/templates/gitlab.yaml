@@ -1,0 +1,66 @@
+# This is probably a spectacularly bad idea running the Docker instructions
+# inside a Kubernetes container. But, this doesn't need to be performant
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-gitlab
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: gitlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab
+  template:
+    metadata:
+      labels:
+        app: gitlab
+    spec:
+      # Ensure this is only run on the control plane
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/control-plane
+                    operator: In
+                    values:
+                      - "true"
+      containers:
+        - name: gitlab
+          image: gitlab/gitlab-ee:15.4.2-ee.0
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitlab
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: gitlab
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: gitlab
+  type: NodePort
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: gitlab-https-certificates
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: gitpod
+spec:
+  secretName: gitlab-https-certificates
+  issuerRef:
+    name: ca-issuer
+    kind: Issuer
+  dnsNames:
+    - "gitlab.{{ $.Values.ingress.domain }}"

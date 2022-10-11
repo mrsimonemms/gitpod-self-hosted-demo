@@ -28,4 +28,27 @@ spec:
                 port:
                   number: 443
 {{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gitlab-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressClassName: nginx
+  tls:
+    - secretName: gitlab-https-certificates
+      hosts:
+        - "gitlab.{{ $.Values.ingress.domain }}"
+  rules:
+    - host: "gitlab.{{ $.Values.ingress.domain }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gitlab
+                port:
+                  number: 80
 {{- end }}

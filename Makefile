@@ -78,6 +78,38 @@ get_cert:
 	@echo "CA cert downloaded to ${CA_CRT_PATH}"
 .PHONY: get_cert
 
+gitlab:
+	@echo "Installing GitLab"
+# https://itslinuxfoss.com/install-gitlab-ubuntu-22-04/
+
+# @sudo apt-get update
+# @sudo apt-get install -y curl openssh-server ca-certificates tzdata perl
+
+# @sudo rm -f /etc/apt/trusted.gpg.d/gitlab.gpg
+# @curl -fsSL https://packages.gitlab.com/gitlab/gitlab-ce/gpgkey | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/gitlab.gpg
+
+# @sudo rm -f /etc/apt/sources.list.d/gitlab_gitlab-ce.list
+# @echo "deb https://packages.gitlab.com/gitlab/gitlab-ce/ubuntu/ focal main" | sudo tee -a /etc/apt/sources.list.d/gitlab_gitlab-ce.list
+# @echo "deb-src https://packages.gitlab.com/gitlab/gitlab-ce/ubuntu/ focal main" | sudo tee -a /etc/apt/sources.list.d/gitlab_gitlab-ce.list
+
+# @sudo apt-get update
+
+# @sudo EXTERNAL_URL="https://gitlab.${GITPOD_URL}" apt-get install gitlab-ce
+	@sudo docker run \
+		--detach \
+		--hostname gitlab.${GITPOD_URL} \
+		--publish 443:443 \
+		--publish 80:80 \
+		--publish 22:22 \
+		--name gitlab \
+		--restart always \
+		--volume ${GITLAB_HOME}/config:/etc/gitlab \
+		--volume ${GITLAB_HOME}/logs:/var/log/gitlab \
+		--volume ${GITLAB_HOME}/data:/var/opt/gitlab \
+		--shm-size 256m \
+		gitlab/gitlab-ee:latest
+.PHONY: gitlab
+
 gitpod:
 	@echo "Installing KOTS"
 
