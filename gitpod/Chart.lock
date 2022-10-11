@@ -5,5 +5,8 @@ dependencies:
 - name: docker-registry
   repository: https://helm.twun.io
   version: 2.2.2
-digest: sha256:4f031259b22fa9ab49f9b1c6da51a5aa21cf0751e15b2a89aecbc25919877574
-generated: "2022-10-12T11:04:25.672697493+01:00"
+- name: ingress-nginx
+  repository: https://kubernetes.github.io/ingress-nginx
+  version: 4.3.0
+digest: sha256:9f84b5030668049b638f69b5b5565c0d9608043c175014d6eb7bb68f38317791
+generated: "2022-10-12T11:05:42.952680308+01:00"

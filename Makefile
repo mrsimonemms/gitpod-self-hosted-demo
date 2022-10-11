@@ -53,6 +53,7 @@ dependencies:
 		--namespace="${GITPOD_NAMESPACE}" \
 		--reset-values \
 		--set="registry.secrets.htpasswd=$$(cat /tmp/htpasswd)" \
+		--set="ingress.domain=${GITPOD_URL}" \
 		--wait \
 		${DEPENDENCIES_NAME} \
 		./gitpod
