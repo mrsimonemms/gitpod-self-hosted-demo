@@ -3,6 +3,15 @@ Gitpod Self-Hosted Demo
 
 Your Gitpod self-hosted demo is now ready for action.
 
+Ingress
+=======
+
+{{- if .Values.ingress.enabled }}
+Ingress is active for {{ .Values.ingress.domain }}
+{{- else }}
+Ingress is not enabled
+{{- end }}
+
 Minio
 =====
 

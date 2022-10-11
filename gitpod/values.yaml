@@ -11,6 +11,18 @@
           values:
           - "true"
 
+# Configuration for the ingress controllers
+ingress:
+  enabled: true
+  domain: gitpod.io
+
+# Configuration for Ingress-NGINX Helm package
+ingressnginx:
+  controller:
+    config: {}
+    extraArgs:
+      enable-ssl-passthrough: true
+
 minio:
   enabled: true
   affinity:
