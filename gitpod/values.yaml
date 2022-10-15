@@ -13,7 +13,7 @@
 
 # Configuration for the ingress controllers
 ingress:
-  enabled: true
+  enabled: false
   domain: gitpod.io
 
 # Configuration for Ingress-NGINX Helm package
@@ -42,7 +42,7 @@ minio:
     enabled: false
 
 registry:
-  enabled: true
+  enabled: false
   affinity:
     <<: *affinity
   persistence:

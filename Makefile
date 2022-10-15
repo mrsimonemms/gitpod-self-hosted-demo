@@ -29,7 +29,7 @@ is available at ${CA_CRT_PATH}.
 Happy coding.
 endef
 
-all: download_binaries k3s gitpod dependencies registry load_ca_cert ready_message
+all: download_binaries k3s gitpod dependencies ready_message
 
 add_node:
 	@echo "Adding a node to the cluster"
