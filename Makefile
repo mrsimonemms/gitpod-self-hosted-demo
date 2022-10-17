@@ -11,6 +11,8 @@ GCP_SERVICE_ACCOUNT_KEY ?=
 REGISTRY_USER ?= username
 REGISTRY_PASSWORD ?= password
 
+GITLAB_HOME ?= /opt/gitlab
+
 SERVER_IP ?=
 SERVER_USER ?=
 
@@ -80,6 +82,32 @@ get_cert:
 
 	@echo "CA cert downloaded to ${CA_CRT_PATH}"
 .PHONY: get_cert
+
+
+gitlab:
+	@echo "Installing GitLab"
+
+	# Reuse the cert that Gitpod uses
+	sudo rm -f ${GITLAB_HOME}/config/ssl/gitlab.${GITPOD_URL}.crt
+	sudo rm -f ${GITLAB_HOME}/config/ssl/gitlab.${GITPOD_URL}.key
+	@kubectl get secret -n ${GITPOD_NAMESPACE} https-certificates -o jsonpath='{.data.tls\.crt}' | base64 -d | sudo tee -a ${GITLAB_HOME}/config/ssl/gitlab.${GITPOD_URL}.crt > /dev/null
+	@kubectl get secret -n ${GITPOD_NAMESPACE} https-certificates -o jsonpath='{.data.tls\.key}' | base64 -d | sudo tee -a ${GITLAB_HOME}/config/ssl/gitlab.${GITPOD_URL}.key > /dev/null
+
+	@sudo docker rm -f gitlab || true
+	@sudo docker run \
+		--detach \
+		--hostname gitlab.${GITPOD_URL} \
+		--publish 8443:8443 \
+		--publish 8022:22 \
+		--env GITLAB_OMNIBUS_CONFIG="external_url 'https://gitlab.${GITPOD_URL}:8443'" \
+		--name gitlab \
+		--restart always \
+		--volume ${GITLAB_HOME}/config:/etc/gitlab:Z \
+		--volume ${GITLAB_HOME}/logs:/var/log/gitlab:Z \
+		--volume ${GITLAB_HOME}/data:/var/opt/gitlab:Z \
+		--shm-size 256m \
+		gitlab/gitlab-ee:latest
+.PHONY: gitlab
 
 gitpod:
 	@echo "Installing KOTS"
